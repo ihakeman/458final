@@ -3,6 +3,23 @@ import Input from "./Input";
 import styled from "styled-components"
 import ListOfItems from "./ListOfItems"
 
+
+// function deleteList(number, mutate, data){
+//     fetch('/api/lists', {
+//         method: 'DELETE', 
+//         headers: {
+//             'Content-Type': 'application/json',
+//         },
+//         body: JSON.stringify({rowNum: number})
+//     })
+//     mutate([...data], {
+//         optimisticData: [...data], 
+//         rollbackOnError: true, 
+//         populateCache: true, 
+//         revalidate: false
+//     })
+// }
+
 export default function fakeTrello( {data, error, mutate} ) {
     const [showNewListForm, setShowNewListForm] = useState(false);
 
@@ -28,15 +45,16 @@ export default function fakeTrello( {data, error, mutate} ) {
     }
 
     //change this method to start a "DELETE" request to /api
-    const clearGratitudes = () => {
-        fetch('/api', {
+    const deleteList = (row) => {
+        console.log(row.number)
+        fetch(`/api/lists/${row.number}`, {
             method: 'DELETE', 
             headers: {
                 'Content-Type': 'application/json',
             },
         })
-        mutate([], {
-            optimisticData: [], 
+        mutate([...data.filter((rowData)=> (rowData.number !== row.number))], {
+            optimisticData: [...data.filter((rowData)=> (rowData.number !== row.number))], 
             rollbackOnError: true, 
             populateCache: true, 
             revalidate: false
@@ -45,15 +63,14 @@ export default function fakeTrello( {data, error, mutate} ) {
 
     return <Wrapper>
         <Title>fake-trello</Title>
-        {!showNewListForm && <Button onClick={setShowNewListForm(!showNewListForm)}>+ List</Button>
+        {!showNewListForm && <Button onClick={() => {setShowNewListForm(!showNewListForm)}}>+ List</Button>
         }
-        {showNewListForm && <Input addList={newList}/>
-        }
+        { showNewListForm && <Input addList={newList} onClick={() => setShowNewListForm(!showNewListForm)}/>}
         {
             data.length > 0 ? (
             <>
             {/* {console.log(data)} */}
-            <ListOfItems data={data.map(row => row.name)} />
+            <ListOfItems data={data.map((row) => <div>{row.name}<button onClick={() => {deleteList(row)}}>delete</button></div>)} />
             {/* <Button onClick={clearGratitudes}>Start Again</Button> */}
             {/* <Spacer height={30} /> */}
             </> )
@@ -70,7 +87,7 @@ const Spacer = styled.div`
 
 const Wrapper = styled.main`
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     padding: 30px max(10px, 10%);
@@ -94,7 +111,7 @@ const Button = styled.button`
     width: 100%;
     border: 3px solid var(--burnt);
     border-radius: 5px;
-    color: var(--burnt);
+    color: black;
     font-size: 1.2rem;
     font-weight: 500;
     text-transform: inherit;

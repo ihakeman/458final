@@ -7,7 +7,7 @@ export default async function request(req, res){
     const supabaseKey = process.env.SUPABASE_KEY
     // create a connection object to our project using the API key
     const supabase = createClient(supabaseUrl, supabaseKey)
-
+    console.log('in api')
     if (req.method === "GET") {
         //from database api recommendations on supabase website    but with : grad... removed since we don't need to rename it
         //this fetches all the rows in the database (the whole thing)
@@ -44,16 +44,29 @@ export default async function request(req, res){
         res.status(200).json(dataLast, data)
     } 
     
-
-    //FIX THIS SO THAT IT ONLY DELETES THE STUFF WE WANT
-    //add an if statement for DELETE requests
-    //and clear out all of the records in your database
+    //REMOVE THIS // FIX THIS SO THAT IT ONLY DELETES THE STUFF WE WANT
     else if (req.method === "DELETE"){
-    
-    const { data, error } = await supabase
-    .from('lists')
-    .delete().gt('id', 0)
+        console.log("PUT")
+        const body = req.body
+        // let { data: row, errorFetch } = await supabase
+        // .from('lists')
+        // .select('*')
+        // .eq('number', body.rowNum)
+        // console.log(row)
+        // //update row prior
+        // if (row.previous===null){
+        //     console.log("null")
+        //     //update previous row
+        // }
+        const { data, error } = await supabase
+        .from('lists')
+        .delete()
+        .eq('number', body.rowNum)
+        console.log('deleting')
+        res.status(200).json(data)
+    }
+    else {
 
-    res.status(200).json(data)
+        console.log('missed it')
     }
 }
