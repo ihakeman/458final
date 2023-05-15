@@ -4,21 +4,6 @@ import styled from "styled-components"
 import ListOfItems from "./ListOfItems"
 
 
-// function deleteList(number, mutate, data){
-//     fetch('/api/lists', {
-//         method: 'DELETE', 
-//         headers: {
-//             'Content-Type': 'application/json',
-//         },
-//         body: JSON.stringify({rowNum: number})
-//     })
-//     mutate([...data], {
-//         optimisticData: [...data], 
-//         rollbackOnError: true, 
-//         populateCache: true, 
-//         revalidate: false
-//     })
-// }
 
 export default function fakeTrello( {data, error, mutate} ) {
     const [showNewListForm, setShowNewListForm] = useState(false);
@@ -61,16 +46,59 @@ export default function fakeTrello( {data, error, mutate} ) {
         })
     };
 
+    const swapDown = (row) => {
+        fetch(`/api/lists/swapdown/`, {
+            method: 'POST', 
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({rowData: row})
+        })
+        let num = row.number
+        console.log(num)
+        let maxBelow = Math.max(...data.filter((rowData) => (rowData.number < num)).map((a) => a.number))
+        let rowBelow = data.filter((rowData) => rowData.number === maxBelow)
+        console.log('rowbelow', rowBelow)
+        console.log(...data.filter((rowData) => rowData.number < num))
+        let lowest = data.filter((rowData) => (rowData.number < Math.max(data.filter((rowData) => (rowData.number < num)).map((a) => a.number))))
+        let upper = data.filter((rowData) => (rowData.number > num))
+       // ...data.filter((rowData) => rowData.number === row.number), ...data.filter((rowData) => rowData.number === Math.max(...data.filter((rowData) => (rowData.number < row.number)).map((a) => a.number))),
+        //last used: ...data.filter((rowData) => (rowData.number < Math.max(...data.filter((rowData) => (rowData.number < num)).map((a) => a.number)))), row, rowBelow[0], ...data.filter((rowData) => (rowData.number > num))
+        mutate([...data], {
+            optimisticData: [...data], 
+            rollbackOnError: true, 
+            populateCache: true, 
+            revalidate: false
+        })
+    };
+    const swapUp = (row) => {
+        console.log(row.number)
+        fetch(`/api/lists/swapup/`, {
+            method: 'POST', 
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({rowData: row})
+        })
+        mutate([...data], {
+            optimisticData: [...data], 
+            rollbackOnError: true, 
+            populateCache: true, 
+            revalidate: false
+        })
+    };
+
+
     return <Wrapper>
         <Title>fake-trello</Title>
         {!showNewListForm && <Button onClick={() => {setShowNewListForm(!showNewListForm)}}>+ List</Button>
         }
-        { showNewListForm && <Input addList={newList} onClick={() => setShowNewListForm(!showNewListForm)}/>}
+        { showNewListForm && <Input addList={newList} onSubmit={() => setShowNewListForm(!showNewListForm)}/>}
         {
             data.length > 0 ? (
             <>
-            {/* {console.log(data)} */}
-            <ListOfItems data={data.map((row) => <div>{row.name}<button onClick={() => {deleteList(row)}}>delete</button></div>)} />
+            {/* https://stackoverflow.com/questions/43572436/sort-an-array-of-objects-in-react-and-render-them */}
+            <ListOfItems data={data.sort((a, b) => a.number > b.number ? 1 : -1).map((row) =><div key={row}><button onClick={() => swapDown(row)}>left</button> <button onClick={() => swapUp(row)}>right</button>{row.name}<button onClick={() => {deleteList(row)}}>delete</button></div>)} />
             {/* <Button onClick={clearGratitudes}>Start Again</Button> */}
             {/* <Spacer height={30} /> */}
             </> )

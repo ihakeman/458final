@@ -10,26 +10,40 @@ export default async function handler(req, res){
     const supabase = createClient(supabaseUrl, supabaseKey)
     //get the path that was entered that includes the title
     const { number } = req.query
-    console.log(number)
+        // const { data: update, errorUpdate } = null;
+        // let { data: rows, errorFetch } = await supabase
+        //     .from('lists')
+        //     .select('*')
+        // let numbers = rows.map((a)=>a.number)
+        // let last = Math.max(...numbers);
+        // let first = Math.min(...numbers)
+        // if(first === last){
+        //     //don't have to do anything but just delete it
+        // }
+        // else if(number === first){
+        //     //just update the next one and set prev to null
+        // ({ update, errorUpdate } = await supabase
+        // .from('lists')
+        // .update({ previous: null })
+        // .eq('number', `${rows.filter((rowData)=> (rowData.number === number)).next}`))
+        // }
+        // else if (number === last){
+        //     //just update the previous one and set next to null
+        //     ({ update, errorUpdate } = await supabase
+        //         .from('lists')
+        //         .update({ next: null })
+        //         .eq('number', `${rows.filter((rowData)=> (rowData.number === number)).previous}`))
+        // }
+        // else{
+        //     //must update previous and next before removing
+        // }
 
-    let { data: row, errorFetch } = await supabase
-        .from('lists')
-        .select('*')
-        .eq('number', number)
-        console.log(row)
-        // //update row prior    https://stackoverflow.com/questions/40735406/checking-for-undefined-in-react
-        if (typeof(row.next)===undefined || typeof(row.next === null)){
-            console.log("undefined or null")
-            //update previous row
-        }
-        else {
-            console.log('not null')
-        }
+
+
     const { data, error } = await supabase
         .from('lists')
         .delete()
         .eq('number', number)
-        console.log('deleting')
         res.status(200).json(data)
 
 }

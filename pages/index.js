@@ -12,7 +12,7 @@ so the front end renders the gratitues from the DB
 const fetcher = url => fetch(url).then(r=>r.json())
 
 export default function Home() {
-  const { data, error, mutate} = useSWR('/api/lists', fetcher)
+  const { data, error, mutate} = useSWR('/api/lists', fetcher, {refreshInterval: 500,})//https://stackoverflow.com/questions/64245201/revalidating-data-using-mutate-in-swr-which-should-i-use
 
     //if the api encounters an error, this will redner
     if (error) {

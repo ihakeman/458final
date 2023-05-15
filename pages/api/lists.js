@@ -7,7 +7,6 @@ export default async function request(req, res){
     const supabaseKey = process.env.SUPABASE_KEY
     // create a connection object to our project using the API key
     const supabase = createClient(supabaseUrl, supabaseKey)
-    console.log('in api')
     if (req.method === "GET") {
         //from database api recommendations on supabase website    but with : grad... removed since we don't need to rename it
         //this fetches all the rows in the database (the whole thing)
@@ -30,18 +29,12 @@ export default async function request(req, res){
         let numbers = lists.map((a)=>a.number)
         let last = Math.max(...numbers);
 
-        const { dataLast, errorLast } = await supabase
-            .from('lists')
-            .update({ next: last+1 })
-            .eq('number', last)
-
-        // res.status(200).json(dataLast)
         const { data, error } = await supabase
         .from('lists')
         .insert([
-            { name: body.listName, number: last+1, previous: last},
+            { name: body.listName, number: last+1},
         ])
-        res.status(200).json(dataLast, data)
+        res.status(200).json(data)
     } 
     
     //REMOVE THIS // FIX THIS SO THAT IT ONLY DELETES THE STUFF WE WANT
