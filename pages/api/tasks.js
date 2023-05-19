@@ -10,7 +10,7 @@ export default async function request(req, res){
     if (req.method === "GET") {
         //from database api recommendations on supabase website    but with : grad... removed since we don't need to rename it
         //this fetches all the rows in the database (the whole thing)
-        let { data , error } = await supabase.from('lists').select('*')
+        let { data , error } = await supabase.from('tasks').select('*')
         // send the data back as a result if everyhting goes as expected
         res.status(200).json(data)
     } 
@@ -22,25 +22,37 @@ export default async function request(req, res){
         const body = req.body
         // console.log("RECEIVED: " + JSON.stringify(body))
 
-       
-        let { data: lists, errorFetch } = await supabase
-        .from('lists')
-        .select('number')
-        let numbers = lists.map((a)=>a.number)
-        let last = Math.max(...numbers);
 
         const { data, error } = await supabase
-        .from('lists')
+        .from('tasks')
         .insert([
-            { name: body.listName, number: last+1},
+            { title: body.title, description: body.description, type: body.type},
         ])
+        .select()
+        console.log(data)
+        res.status(200).json(data)
+    } 
+    else if (req.method === "PUT") {
+        //retrieve the gradtitude entry from the request body and insert that gratitude as a new row in our supabase db
+        //req sent as post has a body
+        const body = req.body
+        // console.log("RECEIVED: " + JSON.stringify(body))
+
+
+        const { data, error } = await supabase
+        .from('tasks')
+        .update(
+            { type: body.newType },
+        )
+        .eq('id', parseInt(body.id))
+        console.log(data, error)
         res.status(200).json(data)
     } 
     
     //REMOVE THIS // FIX THIS SO THAT IT ONLY DELETES THE STUFF WE WANT
     else if (req.method === "DELETE"){
-        console.log("PUT")
-        const body = req.body
+        console.log("DELETE")
+        //const body = req.body
         // let { data: row, errorFetch } = await supabase
         // .from('lists')
         // .select('*')
@@ -51,10 +63,11 @@ export default async function request(req, res){
         //     console.log("null")
         //     //update previous row
         // }
+        const taskID = req.query.id;
         const { data, error } = await supabase
-        .from('lists')
+        .from('tasks')
         .delete()
-        .eq('number', body.rowNum)
+        .eq('id', parseInt(taskID))
         console.log('deleting')
         res.status(200).json(data)
     }
